@@ -14,11 +14,19 @@ const fadeInVariants = {
 export default function Editor() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sessions, setSessions] = useState<{ [key: string]: { html: string } }>(
+    {}
+  );
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/")
+    fetch("http://127.0.0.1:8001/")
       .then((res) => res.json())
       .then((data) => setMessage(data.message))
+      .catch((err) => console.error(err));
+
+    fetch("http://127.0.0.1:8001/sessions")
+      .then((res) => res.json())
+      .then((data) => setSessions(data.sessions))
       .catch((err) => console.error(err));
   }, []);
 
@@ -29,13 +37,18 @@ export default function Editor() {
     const prompt = promptInput.value;
 
     setLoading(true);
-    setMessage(""); // Clear previous message
+    setMessage("");
 
-    fetch(`http://localhost:8000/generate?prompt=${encodeURIComponent(prompt)}`)
+    fetch(`http://localhost:8001/generate?session_id=12345&prompt=${encodeURIComponent(prompt)}`)
       .then((res) => res.json())
       .then((data) => {
         setMessage(data.response);
         setLoading(false);
+
+        fetch("http://127.0.0.1:8001/sessions")
+          .then((res) => res.json())
+          .then((data) => setSessions(data.sessions))
+          .catch((err) => console.error(err));
       })
       .catch((err) => {
         setMessage("Error: " + err.message);
@@ -82,17 +95,43 @@ export default function Editor() {
                     </button>
                   </form>
                 </div>
-                <div className="w-[75%] h-[90%] bg-[#464646] rounded-md shadow-md flex justify-center items-center overflow-auto">
-                  {loading ? (
-                    <p className="text-white text-3xl font-bold animate-pulse">
-                      Generating your website...
-                    </p>
-                  ) : (
-                    <div
-                      className="w-full h-full bg-white rounded-md shadow-md p-4 overflow-auto text-black"
-                      dangerouslySetInnerHTML={{ __html: message }}
-                    />
-                  )}
+
+                <div className="w-[75%] h-[90%] bg-[#464646] rounded-md shadow-md flex flex-col gap-6 p-4 overflow-auto">
+                  <div className="flex-1 bg-white rounded-md shadow-md p-4 overflow-auto text-black">
+                    {loading ? (
+                      <p className="text-white text-3xl font-bold animate-pulse">
+                        Generating your website...
+                      </p>
+                    ) : (
+                      <div
+                        dangerouslySetInnerHTML={{ __html: message }}
+                      />
+                    )}
+                  </div>
+
+                  <div className="bg-[#1a1a1a] rounded-md shadow-md p-4 text-white">
+                    <h2 className="text-2xl font-bold mb-4">Saved Chats</h2>
+                    <div className="flex flex-col gap-4">
+                      {Object.entries(sessions).length === 0 ? (
+                        <p>No saved chats yet.</p>
+                      ) : (
+                        Object.entries(sessions).map(([sessionId, sessionData]) => (
+                          <div
+                            key={sessionId}
+                            className="p-4 bg-[#2a2a2a] rounded-md shadow-md"
+                          >
+                            <h3 className="text-xl font-bold">
+                              Session ID: {sessionId}
+                            </h3>
+                            <div
+                              className="mt-2 text-sm bg-white text-black p-2 rounded-md overflow-auto"
+                              dangerouslySetInnerHTML={{ __html: sessionData.html }}
+                            />
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

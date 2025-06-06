@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"npm run next\" \"npm run pythonUnix\"",
+    "dev": "concurrently \"npm run next\" \"npm run django\" \"npm run python\"",
     "next": "next dev",
-    "python": "cd src/backend && call venv\\Scripts\\activate && uvicorn main:app --host 127.0.0.1 --port 8000 --reload",
-    "pythonUnix": "cd src/backend && source venv/bin/activate && uvicorn main:app --host 127.0.0.1 --port 8000 --reload",
+    "django": "cd src/backend && venv\\Scripts\\python manage.py runserver 127.0.0.1:8000",
+  "python": "cd src/backend && venv\\Scripts\\python -m uvicorn main:app --host 127.0.0.1 --port 8001 --reload",
+    "pythonUnix": "cd src/backend && source venv/bin/activate && uvicorn main:app --host 127.0.0.1 --port 8001 --reload",
     "build": "next build"
   },
   "dependencies": {

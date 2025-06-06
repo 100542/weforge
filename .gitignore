@@ -1,5 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+mistral-7b-instruct-v0.2.Q4_K_M.gguf
+
 # dependencies
 /node_modules
 /.pnp
